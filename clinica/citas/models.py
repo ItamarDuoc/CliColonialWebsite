@@ -3,9 +3,10 @@ from django.db import models
 class Usuario(models.Model):
     id_usuario = models.AutoField(primary_key=True)
     nombre_usuario = models.CharField(max_length=100)
-    numero_celular = models.IntegerField()
+    numero_celular = models.CharField(max_length=100)
     run = models.CharField(max_length=12, unique=True)
-    numero_documento = models.IntegerField(unique=True)
+    numero_documento = models.CharField(max_length=100)
+    password = models.CharField(max_length=100, default="defaultpassword123")
     foto_perfil = models.BinaryField(null=True, blank=True)
 
     def __str__(self):

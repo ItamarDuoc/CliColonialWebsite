@@ -3,6 +3,7 @@ from django import forms
 class LoginForm(forms.Form):
     run = forms.CharField(max_length=12, label="RUN")
     numero_documento = forms.IntegerField(label="Número de Documento")
+    numero_celular = forms.IntegerField(label="Número de Celular")
     password = forms.CharField(widget=forms.PasswordInput, label="Contraseña")
     codigo_2fa = forms.CharField(max_length=6, label="Código 2FA")
 

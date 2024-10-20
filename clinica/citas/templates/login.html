@@ -1,0 +1,60 @@
+{% extends "header.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Iniciar Sesión</h2>
+    <form method="POST" id="loginForm">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="run" class="form-label">RUN</label>
+            <input type="text" class="form-control" id="run" name="run" required>
+        </div>
+        <div class="mb-3">
+            <label for="numero_documento" class="form-label">Número de Documento</label>
+            <input type="text" class="form-control" id="numero_documento" name="numero_documento" required>
+        </div>
+        <div class="mb-3">
+            <label for="numero_celular" class="form-label">Número de Celular</label>
+            <input type="text" class="form-control" id="numero_celular" name="numero_celular" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="mb-3">
+            <label for="codigo_2fa" class="form-label">Código 2FA</label>
+            <input type="text" class="form-control" id="codigo_2fa" name="codigo_2fa" required>
+        </div>
+        <button type="button" class="btn btn-secondary" id="send2fa">Enviar Código 2FA</button>
+        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('#send2fa').click(function() {
+        var numero_celular = $('#numero_celular').val();
+        $.ajax({
+            url: '{% url "send_2fa_code" %}',  // Cambia este URL al correcto si es necesario
+            type: 'POST',
+            data: {
+                'numero_celular': numero_celular,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('Código 2FA enviado exitosamente.');
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            },
+            error: function() {
+                alert('Error en la solicitud.');
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

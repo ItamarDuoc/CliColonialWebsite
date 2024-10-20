@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -70,7 +71,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'clinica.wsgi.application'
-
+SECRET_KEY_CRYPT = config('SECRET_KEY_CRYPT')
+    
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

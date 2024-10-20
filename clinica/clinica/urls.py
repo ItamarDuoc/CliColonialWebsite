@@ -12,5 +12,6 @@ urlpatterns = [
     path('profile/',views.profile_web, name="profile"),
     path('dashboard/',views.dashboard_web, name="dashboard"),
     path('cites/',views.cites_web, name="cites"),
-    path('', RedirectView.as_view(url='/home/', permanent=True), name="default") # -> Para evitar la pagina de error
+    path('', RedirectView.as_view(url='/home/', permanent=True), name="default"), # -> Para evitar la pagina de error
+    path('send_2fa_code/', views.send_2fa_code, name='send_2fa_code'),  # URL para enviar el codigo 2FA
 ]
