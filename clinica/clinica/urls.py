@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import RedirectView
+
 from citas import views
 
 urlpatterns = [
@@ -25,4 +27,5 @@ urlpatterns = [
     path('home/',views.home_web),
     path('profile/',views.profile_web),
     path('dashboard/',views.dashboard_web),
+    path('', RedirectView.as_view(url='/home/', permanent=True)) # -> Para evitar la pagina de error
 ]
