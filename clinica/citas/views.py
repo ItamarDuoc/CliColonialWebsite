@@ -31,9 +31,9 @@ def send_2fa_code(code, numero_telefono):
         raise ValueError(str(e) + "Error al enviar SMS")
 
 def registro_web(request):
+    code_2FA = gen_2fa_code()
     # Verificar si el usuario ya ha iniciado sesion
     # Si no ha iniciado sesion, esperar un metodo Post del formulario para registrar la cuenta
-    # Generar un numero al azar de 6 digitos del 0 al 999999, este se utilizara para el 2FA
     # El registro debe registrar los datos: nombre_usuario, numero_celular, run, numero_documento. El ID del usuario se genera automaticamente y la foto de perfil quedará vacia.
     # Se debe validar que los datos cumplan con un patron valido y que el 2FA sea correcto.
     # Utilizar la libreria bcrypt para encriptar los datos sensibles.
@@ -42,22 +42,12 @@ def registro_web(request):
 
 
 def login_web(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            run = form.cleaned_data['run']
-            password = form.cleaned_data['password']
-            try:
-                usuario = Usuario.objects.get(run=run)
-                if bcrypt.checkpw(password.encode('utf-8'), usuario.password.encode('utf-8')):  
-                    return redirect('home')
-                else:
-                    messages.error(request, 'Contraseña incorrecta.')
-            except Usuario.DoesNotExist:
-                messages.error(request, 'Usuario no encontrado.')
-    else:
-        form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+    code_2FA = gen_2fa_code()
+    # Verificar si el usuario ya ha iniciado sesion
+    # Si no ha iniciado sesion, esperar un metodo Post del formulario para loguear la cuenta
+    # El registro debe registrar los datos: nombre_usuario, numero_celular, run, numero_documento. El ID del usuario se genera automaticamente y la foto de perfil quedará vacia.
+    # Se debe validar que los datos cumplan con un patron valido, que sean correctos y que el 2FA sea correcto.
+    return "Realizar logica: Pendiente"
 
 
 def home_web(request):
