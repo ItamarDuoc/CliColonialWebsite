@@ -72,6 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'clinica.wsgi.application'
 SECRET_KEY_CRYPT = config('SECRET_KEY_CRYPT')
+SESSION_COOKIE_AGE = 60
     
 
 # Database
