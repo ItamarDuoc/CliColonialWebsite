@@ -1,6 +1,12 @@
 {% extends "header.html" %}
 
 {% block content %}
-<h1>CONTENIDO DEL SITIO AQUI!</h1>
-
+{% load static %}
+<div class="text-center mt-5">
+    <img src="{% static 'img/Medicos.jpg' %}" alt="Medicos" class="img-fluid mt-4">
+    <h1>Clinica Colonial</h1>
+    <p></p>
+    <h2 class="mt-4">¿Quieres agendar una hora?</h2>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Agendar hora</a>
+</div>
 {% endblock %}

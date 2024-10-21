@@ -123,6 +123,9 @@ def home_web(request):
 def dashboard_web(request):
     return render(request, "dashboard.html")
 
+def agendar_consulta_web(request):
+    return render(request, "agendar_consulta.html")
+
 def cites_web(request):
     return render(request, "cites.html")
 
