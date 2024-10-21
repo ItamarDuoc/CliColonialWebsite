@@ -22,7 +22,7 @@ class Suscripcion(models.Model):
     id_suscripcion = models.AutoField(primary_key=True)
     fecha_inicio = models.DateField()
     fecha_termino = models.DateField()
-    estado = models.CharField(max_length=1) # Activa ('A'), Inactiva ('I') 
+    estado = models.CharField(max_length=1, default='N') # Tiene ('Y'), No tiene ('N') 
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
     tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
 

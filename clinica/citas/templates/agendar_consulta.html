@@ -1,14 +1,37 @@
 {% extends "header.html" %}
 
 {% block content %}
-{% if request.session.id_usuario %}
-    <h1>CONTENIDO DEL SITIO AQUI!</h1>
-{% else %}
-    <h1>¡Inicia sesion o crea una cuenta!</h1>
-    <script>
-        setTimeout(function() {
-            window.location.href = "/login";
-        }, 1000);
-    </script>
-{% endif %}
+    {% if request.session.id_usuario %}
+        {% if suscripcion_activa %}
+            <h2>Selecciona una fecha para ver los médicos disponibles</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="fecha">Selecciona fecha:</label>
+                <input type="date" id="fecha" name="fecha" required>
+                <button type="submit">Buscar médicos</button>
+            </form>
+
+            {% if medicos_disponibles %}
+                <h3>Médicos disponibles en la fecha seleccionada:</h3>
+                <ul>
+                    {% for medico in medicos_disponibles %}
+                        <li>{{ medico.nombre_medico }} - Especialidad: {{ medico.especialidad.nombre_especialidad }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% else %}
+            <h2>No tienes una membresía activa, tu cita se asignará automáticamente al presionar el botón.</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit">Asignar cita automáticamente</button>
+            </form>
+        {% endif %}
+    {% else %}
+        <h1>¡Inicia sesión o crea una cuenta!</h1>
+        <script>
+            setTimeout(function() {
+                window.location.href = "/login";
+            }, 1000);
+        </script>
+    {% endif %}
 {% endblock %}

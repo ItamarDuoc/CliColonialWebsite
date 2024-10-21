@@ -54,7 +54,6 @@ def registro_web(request):
         codigo_2fa = request.POST.get('codigo_2fa')
 
         if password == confirm_password:
-            # Cifrar datos sensibles
             encript_password = cifrar_dato(password)
             encript_numero_doc = cifrar_dato(numero_documento)
             encript_numero_celular = cifrar_dato(numero_celular)
@@ -91,17 +90,12 @@ def login_web(request):
 
         try:
             usuario = Usuario.objects.get(run=run)
-
-            # Descifrar número de documento y número de celular
             descifrado_numero_doc = descifrar_dato(usuario.numero_documento)
             descifrado_numero_celular = descifrar_dato(usuario.numero_celular)
 
             if descifrado_numero_doc == numero_documento and descifrado_numero_celular == numero_celular:
-                # Verificar la contraseña descifrada
                 if descifrar_dato(usuario.password) == password:
-                    # Simular verificación de código 2FA
                     codigo_enviado = request.session.get('2fa_code')
-
                     if codigo_enviado == codigo_2fa:
                         request.session['id_usuario'] = usuario.id_usuario
                         messages.success(request, f'¡Bienvenido {usuario.nombre_usuario}!')
@@ -125,6 +119,12 @@ def dashboard_web(request):
 
 def agendar_consulta_web(request):
     return render(request, "agendar_consulta.html")
+
+def agendar_examen_web(request):
+    return render(request, "agendar_examen.html")
+
+def agendar_seguimiento_web(request):
+    return render(request, "agendar_seguimiento.html")
 
 def cites_web(request):
     return render(request, "cites.html")

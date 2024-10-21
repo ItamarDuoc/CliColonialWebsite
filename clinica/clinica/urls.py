@@ -12,7 +12,9 @@ urlpatterns = [
     path('profile/',views.profile_web, name="profile"),
 
     path('dashboard/',views.dashboard_web, name="dashboard"),
-    path('agendar-consulta', views.agendar_consulta_web, name="agendar_consulta"),
+    path('agendar-consulta/', views.agendar_consulta_web, name="agendar_consulta"),
+    path('agendar-examen/', views.agendar_examen_web, name="agendar_examen"),
+    path('agendar-seguimiento/', views.agendar_seguimiento_web, name="agendar_seguimiento"),
 
     path('cites/',views.cites_web, name="cites"),
     path('', RedirectView.as_view(url='/home/', permanent=True), name="default"), # -> Para evitar la pagina de error
