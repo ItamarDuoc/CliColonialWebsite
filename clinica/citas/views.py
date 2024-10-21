@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Usuario
+from .models import *
 from .forms import RegistroForm, LoginForm
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -7,7 +7,6 @@ import secrets
 from twilio.rest import Client
 from django.http import JsonResponse
 from .utils import cifrar_dato, descifrar_dato
-
 
 def gen_2fa_code():
     return ''.join(secrets.choice('0123456789') for _ in range(6))
