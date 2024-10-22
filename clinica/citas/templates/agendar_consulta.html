@@ -2,23 +2,17 @@
 
 {% block content %}
     {% if request.session.id_usuario %}
-        {% if suscripcion_activa %}
+        {% if tiene_suscripcion %}
             <h2>Selecciona una fecha para ver los médicos disponibles</h2>
             <form method="POST">
                 {% csrf_token %}
                 <label for="fecha">Selecciona fecha:</label>
                 <input type="date" id="fecha" name="fecha" required>
-                <button type="submit">Buscar médicos</button>
+                <!--{%FOR PARA LISTAR MEDICOS%}-->
+                
+                <!--{%END FOR%}-->
+                <button></button>
             </form>
-
-            {% if medicos_disponibles %}
-                <h3>Médicos disponibles en la fecha seleccionada:</h3>
-                <ul>
-                    {% for medico in medicos_disponibles %}
-                        <li>{{ medico.nombre_medico }} - Especialidad: {{ medico.especialidad.nombre_especialidad }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         {% else %}
             <h2>No tienes una membresía activa, tu cita se asignará automáticamente al presionar el botón.</h2>
             <form method="POST">

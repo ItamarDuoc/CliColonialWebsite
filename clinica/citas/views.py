@@ -7,6 +7,18 @@ import secrets
 from twilio.rest import Client
 from django.http import JsonResponse
 from .utils import cifrar_dato, descifrar_dato
+from django.utils import timezone
+from datetime import timedelta
+
+# UTILES
+def verificar_suscripcion_activa(usuario):
+    try:
+        suscripcion = Suscripcion.objects.get(usuario=usuario)
+        if suscripcion.estado == 'Y' and suscripcion.fecha_termino >= timezone.now().date():
+            return True
+    except Suscripcion.DoesNotExist:
+        return False
+    return False
 
 def gen_2fa_code():
     return ''.join(secrets.choice('0123456789') for _ in range(6))
@@ -34,7 +46,7 @@ def send_2fa_code(request):
             #)
 
             #request.session['2fa_code'] = code_2FA
-            #request.session['numero_celular'] = numero_celular  # Guardar el número de celular también
+            #request.session['numero_celular'] = numero_celular
 
             return JsonResponse({'success': True})
         except Exception as e:
@@ -42,6 +54,7 @@ def send_2fa_code(request):
 
     return JsonResponse({'success': False, 'error': 'Método inválido'})
 
+# VISTAS
 def registro_web(request):
     if request.method == 'POST':
         nombre_usuario = request.POST.get('nombre_usuario')
@@ -69,6 +82,14 @@ def registro_web(request):
                 )
                 usuario.save()
 
+                suscripcion = Suscripcion(
+                    usuario=usuario,
+                    fecha_inicio=timezone.now(),
+                    fecha_termino=timezone.now() + timedelta(days=30),
+                    estado='Y', # Valor por defecto
+                    tarjeta=None 
+                )
+                suscripcion.save()
                 request.session['id_usuario'] = usuario.id_usuario
                 messages.success(request, '¡Registro exitoso!')
                 return redirect('home')
@@ -77,7 +98,7 @@ def registro_web(request):
         else:
             messages.error(request, 'Las contraseñas no coinciden')
 
-    return render(request, 'register.html')
+    return render(request, 'register.html') 
 
 def login_web(request):
     if request.method == 'POST':
@@ -117,7 +138,19 @@ def dashboard_web(request):
     return render(request, "dashboard.html")
 
 def agendar_consulta_web(request):
-    return render(request, "agendar_consulta.html")
+    usuario_id = request.session.get('id_usuario')
+    if usuario_id:
+        usuario = Usuario.objects.get(id_usuario=usuario_id)
+        tiene_suscripcion = verificar_suscripcion_activa(usuario)
+
+        if request.method == 'POST':
+            print("SE AGENDO UNA CITA - LOGICA NECESARIA")
+
+        return render(request, "agendar_consulta.html", {
+            'tiene_suscripcion': tiene_suscripcion
+        })
+    else:
+        return redirect('login')
 
 def agendar_examen_web(request):
     return render(request, "agendar_examen.html")

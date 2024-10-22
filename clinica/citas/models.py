@@ -22,9 +22,9 @@ class Suscripcion(models.Model):
     id_suscripcion = models.AutoField(primary_key=True)
     fecha_inicio = models.DateField()
     fecha_termino = models.DateField()
-    estado = models.CharField(max_length=1, default='N') # Tiene ('Y'), No tiene ('N') 
+    estado = models.CharField(max_length=1, default='N')  # Tiene ('Y'), No tiene ('N') 
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-    tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
+    tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE, null=True, blank=True)  # Tarjeta opcional
 
 class Medico(models.Model):
     id_medico = models.AutoField(primary_key=True)
@@ -54,5 +54,5 @@ class Cita(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     tipo_cita = models.CharField(max_length=100)  # Ejemplo: "Consulta", "Revisión"
     hora_cita = models.DateTimeField()
-    estado = models.CharField(max_length=1)  # Pendiente ('P'), Completada ('C'), Cancelada ('X')
+    estado = models.CharField(max_length=1)  # Disponible "D", Ocupada "O"
     administrador = models.ForeignKey(Administrador, on_delete=models.SET_NULL, null=True, blank=True)
