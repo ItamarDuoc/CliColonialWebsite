@@ -31,24 +31,24 @@ def send_2fa_code(request):
         if not numero_celular:
             return JsonResponse({'success': False, 'error': 'Número de celular no proporcionado'})
         code_2FA = gen_2fa_code()
-        request.session['2fa_code'] = code_2FA
-        request.session['numero_celular'] = numero_celular
-        for _ in range (10): # Para ver el codigo en la consola sin usar la API por ahora
-            print(code_2FA)
+        #request.session['2fa_code'] = code_2FA
+        #request.session['numero_celular'] = numero_celular
+        #for _ in range (10): # Para ver el codigo en la consola sin usar la API por ahora
+        #    print(code_2FA)
         try:
             account_sid = ''
             auth_token = ''
             twilio_number = '+'
-            #client = Client(account_sid, auth_token)
+            client = Client(account_sid, auth_token)
 
-            #message = client.messages.create(
-            #    body=f"Tu código de verificación es: {code_2FA}",
-            #    from_=twilio_number,
-            #    to=f'+{numero_celular}'
-            #)
+            message = client.messages.create(
+                body=f"Tu código de verificación es: {code_2FA}",
+                from_=twilio_number,
+                to=f'+{numero_celular}'
+            )
 
-            #request.session['2fa_code'] = code_2FA
-            #request.session['numero_celular'] = numero_celular
+            request.session['2fa_code'] = code_2FA
+            request.session['numero_celular'] = numero_celular
 
             return JsonResponse({'success': True})
         except Exception as e:
@@ -154,16 +154,12 @@ def agendar_consulta_web(request):
     tiene_suscripcion = suscripcion and suscripcion.estado == 'Y' and suscripcion.fecha_termino > timezone.now().date()
 
     if request.method == 'POST':
-        # Calcula la hora actual + 1 hora
         hora_actual_mas_una = timezone.now() + timedelta(hours=1)
-        fecha_cita = hora_actual_mas_una.strftime("%Y-%m-%d %H:%M:%S")  # Fecha de la cita, una hora más tarde
-
+        fecha_cita = hora_actual_mas_una.strftime("%Y-%m-%d %H:%M:%S")
         if tiene_suscripcion:
-            # Si tiene suscripción, permite elegir médico
             medico_id = request.POST.get('medico_id')
             medico = Medico.objects.get(id_medico=medico_id)
         else:
-            # Selecciona un médico al azar
             medicos_disponibles = Medico.objects.all()
             if medicos_disponibles.exists():
                 medico = random.choice(medicos_disponibles)
@@ -171,12 +167,11 @@ def agendar_consulta_web(request):
                 messages.error(request, 'No hay médicos disponibles en este momento.')
                 return redirect('/agendar-consulta')
 
-        # Crea la cita con el médico asignado
         Cita.objects.create(
             medico=medico,
             usuario=usuario,
             tipo_cita="Consulta",
-            hora_cita=fecha_cita,  # Usamos la fecha actual + 1 hora
+            hora_cita=fecha_cita,
             estado="O",
         )
         return redirect('/confirmacion')
