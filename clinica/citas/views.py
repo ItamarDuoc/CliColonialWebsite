@@ -8,7 +8,9 @@ from twilio.rest import Client
 from django.http import JsonResponse
 from .utils import cifrar_dato, descifrar_dato
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
+import random
+
 
 # UTILES
 def verificar_suscripcion_activa(usuario):
@@ -138,19 +140,52 @@ def dashboard_web(request):
     return render(request, "dashboard.html")
 
 def agendar_consulta_web(request):
-    usuario_id = request.session.get('id_usuario')
-    if usuario_id:
-        usuario = Usuario.objects.get(id_usuario=usuario_id)
-        tiene_suscripcion = verificar_suscripcion_activa(usuario)
+    if not request.session.get('id_usuario'):
+        return redirect('/login')
 
-        if request.method == 'POST':
-            print("SE AGENDO UNA CITA - LOGICA NECESARIA")
+    usuario_id = request.session['id_usuario']
+    usuario = Usuario.objects.get(id_usuario=usuario_id)
 
-        return render(request, "agendar_consulta.html", {
-            'tiene_suscripcion': tiene_suscripcion
-        })
-    else:
-        return redirect('login')
+    try:
+        suscripcion = Suscripcion.objects.get(usuario=usuario)
+    except Suscripcion.DoesNotExist:
+        suscripcion = None
+
+    tiene_suscripcion = suscripcion and suscripcion.estado == 'Y' and suscripcion.fecha_termino > timezone.now().date()
+
+    if request.method == 'POST':
+        # Calcula la hora actual + 1 hora
+        hora_actual_mas_una = timezone.now() + timedelta(hours=1)
+        fecha_cita = hora_actual_mas_una.strftime("%Y-%m-%d %H:%M:%S")  # Fecha de la cita, una hora más tarde
+
+        if tiene_suscripcion:
+            # Si tiene suscripción, permite elegir médico
+            medico_id = request.POST.get('medico_id')
+            medico = Medico.objects.get(id_medico=medico_id)
+        else:
+            # Selecciona un médico al azar
+            medicos_disponibles = Medico.objects.all()
+            if medicos_disponibles.exists():
+                medico = random.choice(medicos_disponibles)
+            else:
+                messages.error(request, 'No hay médicos disponibles en este momento.')
+                return redirect('/agendar-consulta')
+
+        # Crea la cita con el médico asignado
+        Cita.objects.create(
+            medico=medico,
+            usuario=usuario,
+            tipo_cita="Consulta",
+            hora_cita=fecha_cita,  # Usamos la fecha actual + 1 hora
+            estado="O",
+        )
+        return redirect('/confirmacion')
+
+    context = {
+        'tiene_suscripcion': tiene_suscripcion,
+    }
+
+    return render(request, 'agendar_consulta.html', context)
 
 def agendar_examen_web(request):
     return render(request, "agendar_examen.html")
