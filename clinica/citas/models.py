@@ -41,7 +41,7 @@ class Especialidad(models.Model):
     def __str__(self):
         return self.nombre_especialidad
 
-class Administrador(models.Model):
+class Administrador(models.Model): #Obsoleto
     id_administrador = models.AutoField(primary_key=True)
     nombre_administrador = models.CharField(max_length=100)
 
