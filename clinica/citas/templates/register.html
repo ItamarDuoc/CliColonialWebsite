@@ -34,10 +34,8 @@
             <input type="text" class="form-control" id="codigo_2fa" name="codigo_2fa" required>
         </div>
 
-        <!-- Botón para solicitar el envío del código 2FA -->
         <button type="button" class="btn btn-secondary" id="send2fa">Enviar Código 2FA</button>
 
-        <!-- Botón para completar el registro -->
         <button type="submit" class="btn btn-primary">Registrar</button>
     </form>
     <h2>¿Ya tienes una cuenta?</h2>
@@ -50,7 +48,7 @@ $(document).ready(function(){
     $('#send2fa').click(function() {
         var numero_celular = $('#numero_celular').val();
         $.ajax({
-            url: '{% url "send_2fa_code" %}',  // Cambia este URL al correcto si es necesario
+            url: '{% url "send_2fa_code" %}',
             type: 'POST',
             data: {
                 'numero_celular': numero_celular,

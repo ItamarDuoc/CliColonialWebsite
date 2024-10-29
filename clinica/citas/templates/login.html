@@ -38,7 +38,7 @@ $(document).ready(function(){
     $('#send2fa').click(function() {
         var numero_celular = $('#numero_celular').val();
         $.ajax({
-            url: '{% url "send_2fa_code" %}',  // Cambia este URL al correcto si es necesario
+            url: '{% url "send_2fa_code" %}',
             type: 'POST',
             data: {
                 'numero_celular': numero_celular,

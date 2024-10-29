@@ -88,7 +88,7 @@ def registro_web(request):
                     usuario=usuario,
                     fecha_inicio=timezone.now(),
                     fecha_termino=timezone.now() + timedelta(days=30),
-                    estado='Y', # Valor por defecto
+                    estado='N', # Valor por defecto -> Sin suscripcion
                     tarjeta=None 
                 )
                 suscripcion.save()
