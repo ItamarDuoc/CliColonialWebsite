@@ -50,9 +50,10 @@ class Administrador(models.Model): #Obsoleto
 
 class Cita(models.Model):
     id_cita = models.AutoField(primary_key=True)
-    medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, null=True, blank=True)  # Médico opcional
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)  # Usuario opcional
     tipo_cita = models.CharField(max_length=100)  # Ejemplo: "Consulta", "Revisión"
     hora_cita = models.DateTimeField()
     estado = models.CharField(max_length=1)  # Disponible "D", Ocupada "O"
     administrador = models.ForeignKey(Administrador, on_delete=models.SET_NULL, null=True, blank=True)
+

@@ -9,6 +9,8 @@ from django.http import JsonResponse
 from .utils import cifrar_dato, descifrar_dato
 from django.utils import timezone
 from datetime import timedelta, datetime
+import time
+import threading
 import random
 
 
@@ -193,3 +195,51 @@ def cites_web(request):
 
 def profile_web(request):
     return render(request, "profile.html")
+
+
+# Solucion temeraria para generar bloques de citas para 3 meses cada 1 mes XD
+generated_in_day = False
+
+def Generar_Bloques():
+    global generated_in_day
+    fecha_actual = timezone.now().date()
+    primer_dia = fecha_actual.replace(day=1)
+
+    if generated_in_day or (fecha_actual != primer_dia):
+        return
+
+    fecha_fin = fecha_actual + timedelta(days=90)
+
+    while fecha_actual <= fecha_fin:
+        hora_inicio = timezone.make_aware(datetime.combine(fecha_actual, datetime.min.time()).replace(hour=8, minute=0, second=0), timezone.get_current_timezone())
+        hora_fin = timezone.make_aware(datetime.combine(fecha_actual, datetime.min.time()).replace(hour=19, minute=0, second=0), timezone.get_current_timezone())
+
+        while hora_inicio <= hora_fin:
+            cita_existente = Cita.objects.filter(hora_cita=hora_inicio).exists()
+            if not cita_existente:
+                Cita.objects.create(
+                    medico=None,
+                    usuario=None,
+                    tipo_cita="Consulta",
+                    hora_cita=hora_inicio,
+                    estado="D"
+                )
+            
+            hora_inicio += timedelta(minutes=30)
+
+        fecha_actual += timedelta(days=1)
+
+    generated_in_day = True
+
+
+def BucleCreador():
+    while True:
+        try:
+            Generar_Bloques()
+        except Exception as e:
+            time.sleep(10)
+            print(f"Error: {e}")
+        time.sleep(86400/4) # 4 veces al dia
+
+HiloCreador = threading.Thread(target=BucleCreador)
+HiloCreador.start()
