@@ -4,11 +4,11 @@
 {% if request.session.id_usuario %}
     <h1>CONTENIDO DEL SITIO AQUI!</h1>
 {% else %}
-    <h1>¡Inicia sesion o crea una cuenta!</h1>
+    <h1>¡Para agendar una hora inicia sesión o crea una cuenta!</h1>
     <script>
         setTimeout(function() {
             window.location.href = "/login";
-        }, 1000);
+        }, 1500);
     </script>
 {% endif %}
 {% endblock %}

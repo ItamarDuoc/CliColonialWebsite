@@ -33,11 +33,11 @@ def send_2fa_code(request):
         if not numero_celular:
             return JsonResponse({'success': False, 'error': 'Número de celular no proporcionado'})
         code_2FA = gen_2fa_code()
-        #request.session['2fa_code'] = code_2FA
-        #request.session['numero_celular'] = numero_celular
-        #for _ in range (10): # Para ver el codigo en la consola sin usar la API por ahora
-        #    print(code_2FA)
-        try:
+        request.session['2fa_code'] = code_2FA
+        request.session['numero_celular'] = numero_celular
+        for _ in range (10): # Para ver el codigo en la consola sin usar la API por ahora
+            print(code_2FA)
+        """try:
             account_sid = ''
             auth_token = ''
             twilio_number = '+'
@@ -54,7 +54,7 @@ def send_2fa_code(request):
 
             return JsonResponse({'success': True})
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            return JsonResponse({'success': False, 'error': str(e)})"""
 
     return JsonResponse({'success': False, 'error': 'Método inválido'})
 
