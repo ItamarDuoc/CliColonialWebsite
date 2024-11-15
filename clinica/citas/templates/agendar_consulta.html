@@ -3,9 +3,62 @@
 {% block content %}
     {% if request.session.id_usuario %}
         {% if tiene_suscripcion %}
-            <h2>SI TIENE SUSCRIPCION!</h2>
+            <h2>Para agendar una hora seleccione un médico y la fecha, luego escoja una cita disponible.</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="medico">Seleccionar Médico:</label>
+                <select id="medico" name="medico" required>
+                    {% for medico in medicos %}
+                        <option value="{{ medico.id_medico }}">{{ medico.nombre_medico }} - {{ medico.especialidad.nombre_especialidad }}</option>
+                    {% endfor %}
+                </select>
+                
+                <label for="fecha">Seleccionar Fecha:</label>
+                <input type="date" id="fecha" name="fecha" required>
+
+                <label for="cita">Seleccionar Cita Disponible:</label>
+                <select id="cita" name="cita" required>
+                    <option value="">Selecciona una fecha primero</option>
+                </select>
+
+                <button type="submit">Agendar Cita</button>
+            </form>
+
+            <!--Hay que cambiar la logica de esto-->
+            <script>
+                document.getElementById('fecha').addEventListener('change', function() {
+                    var medicoId = document.getElementById('medico').value;
+                    var fechaSeleccionada = this.value;
+                    
+                    if (medicoId && fechaSeleccionada) {
+                        fetch(`/get_citas_disponibles/${medicoId}/${fechaSeleccionada}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                var citaSelect = document.getElementById('cita');
+                                citaSelect.innerHTML = '';
+
+                                if (data.citas_disponibles.length > 0) {
+                                    data.citas_disponibles.forEach(function(cita) {
+                                        var option = document.createElement('option');
+                                        option.value = cita.id;
+                                        option.textContent = cita.descripcion;
+                                        citaSelect.appendChild(option);
+                                    });
+                                } else {
+                                    var option = document.createElement('option');
+                                    option.value = '';
+                                    option.textContent = 'No hay citas disponibles';
+                                    citaSelect.appendChild(option);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    }
+                });
+            </script>
         {% else %}
-            <h2>No tienes una membresía activa, tu cita se asignará automáticamente al presionar el botón.</h2>
+            <h2>No tienes una membresía activa, tu cita se asignara automáticamente al presionar el boton.</h2>
             <form method="POST">
                 {% csrf_token %}
                 <button type="submit">Asignar cita automáticamente</button>

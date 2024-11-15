@@ -12,6 +12,8 @@ from datetime import timedelta, datetime
 import time
 import threading
 import random
+from django.db.models import DateField
+from django.db.models.functions import Cast
 
 
 # UTILES
@@ -57,6 +59,36 @@ def send_2fa_code(request):
             return JsonResponse({'success': False, 'error': str(e)})"""
 
     return JsonResponse({'success': False, 'error': 'Método inválido'})
+
+def get_citas_disponibles(request, medico_id, fecha):
+    try:
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+
+        medico = Medico.objects.get(id_medico=medico_id)
+
+        horas_todas = [f"{str(h).zfill(2)}:00" for h in range(7, 21)]
+        horas_todas += [f"{str(h).zfill(2)}:30" for h in range(7, 20)]
+
+        citas_agendadas = Cita.objects.filter(
+            estado='O',
+        ).annotate(fecha_cita=Cast('hora_cita', DateField())).filter(fecha_cita=fecha_obj).values_list('hora_cita', flat=True)
+
+        horas_ocupadas = [cita.strftime('%H:%M') for cita in citas_agendadas]
+
+        horas_disponibles = [hora for hora in horas_todas if hora not in horas_ocupadas]
+
+        citas_disponibles = [
+            {'id': f"{medico.id_medico}-{fecha}-{hora}", 'descripcion': f"{hora} - {medico.nombre_medico} - {medico.especialidad.nombre_especialidad}"}
+            for hora in horas_disponibles
+        ]
+
+        return JsonResponse({'citas_disponibles': citas_disponibles})
+    
+    except Medico.DoesNotExist:
+        return JsonResponse({'error': 'Médico no encontrado'}, status=404)
+    except Exception as e:
+        print(e)  # Esto mostrará el error en la consola del servidor
+        return JsonResponse({'error': 'Error interno del servidor'}, status=500)
 
 # VISTAS
 def registro_web(request):
@@ -141,10 +173,24 @@ def home_web(request):
 def dashboard_web(request):
     return render(request, "dashboard.html")
 
+def agendar_hora(usuario, medico, fecha, hora):
+    # Logica para agendar una cita en un bloque de tiempo
+    try:
+        cita = Cita.objects.get(hora_cita=hora, medico=medico, estado="D")  # Buscar cita disponible
+        cita.usuario = usuario
+        cita.estado = "O"  # Marcar como ocupada
+        cita.save()
+        return True
+    except Cita.DoesNotExist:
+        return False
+
 def agendar_consulta_web(request):
+    # Usar agendar_hora() para agendar una hora disponible
+    medicos = Medico.objects.all()
+    print(medicos)
     if not request.session.get('id_usuario'):
         return redirect('/login')
-
+    
     usuario_id = request.session['id_usuario']
     usuario = Usuario.objects.get(id_usuario=usuario_id)
 
@@ -156,33 +202,33 @@ def agendar_consulta_web(request):
     tiene_suscripcion = suscripcion and suscripcion.estado == 'Y' and suscripcion.fecha_termino > timezone.now().date()
 
     if request.method == 'POST':
-        hora_actual_mas_una = timezone.now() + timedelta(hours=1)
-        fecha_cita = hora_actual_mas_una.strftime("%Y-%m-%d %H:%M:%S")
         if tiene_suscripcion:
-            medico_id = request.POST.get('medico_id')
+            medico_id = request.POST.get('medico')
+            fecha = request.POST.get('fecha')
+            hora = request.POST.get('hora')
+
+            hora_cita = timezone.make_aware(datetime.combine(datetime.strptime(fecha, '%Y-%m-%d'), datetime.strptime(hora, '%H:%M').time()))
+
             medico = Medico.objects.get(id_medico=medico_id)
-        else:
-            medicos_disponibles = Medico.objects.all()
-            if medicos_disponibles.exists():
-                medico = random.choice(medicos_disponibles)
+
+            if agendar_hora(usuario, medico, fecha, hora_cita):
+                messages.success(request, 'Cita agendada con éxito.')
             else:
-                messages.error(request, 'No hay médicos disponibles en este momento.')
-                return redirect('/agendar-consulta')
+                messages.error(request, 'No se pudo agendar la cita, intenta con otra hora.')
+        else:
+            cita_disponible = Cita.objects.filter(estado='D').first()
+            if cita_disponible:
+                cita_disponible.usuario = usuario
+                cita_disponible.estado = 'O'
+                cita_disponible.save()
+                messages.success(request, f'Cita agendada automáticamente para el {cita_disponible.hora_cita}.')
+            else:
+                messages.error(request, 'No hay citas disponibles.')
 
-        Cita.objects.create(
-            medico=medico,
-            usuario=usuario,
-            tipo_cita="Consulta",
-            hora_cita=fecha_cita,
-            estado="O",
-        )
-        return redirect('/confirmacion')
-
-    context = {
+    return render(request, 'agendar_consulta.html', {
         'tiene_suscripcion': tiene_suscripcion,
-    }
-
-    return render(request, 'agendar_consulta.html', context)
+        'medicos': medicos,
+    })
 
 def agendar_examen_web(request):
     return render(request, "agendar_examen.html")

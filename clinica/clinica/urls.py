@@ -19,4 +19,5 @@ urlpatterns = [
     path('cites/',views.cites_web, name="cites"),
     path('', RedirectView.as_view(url='/home/', permanent=True), name="default"), # -> Para evitar la pagina de error
     path('send_2fa_code/', views.send_2fa_code, name='send_2fa_code'),  # URL para enviar el codigo 2FA
+    path('get_citas_disponibles/<int:medico_id>/<str:fecha>/', views.get_citas_disponibles, name='get_citas_disponibles'),# para ver las citas de un dia
 ]
